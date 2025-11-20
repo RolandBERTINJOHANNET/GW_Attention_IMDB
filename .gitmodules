@@ -1,0 +1,3 @@
+[submodule "third_party/shimmer"]
+	path = third_party/shimmer
+	url = git@github.com:ruflab/shimmer.git

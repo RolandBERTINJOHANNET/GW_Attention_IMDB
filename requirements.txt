@@ -1,0 +1,9 @@
+# Synced to local 'imdb' conda env snapshot
+torch==2.8.0
+torchvision==0.23.0
+pytorch-lightning==2.5.0.post0
+lightning==2.5.0.post0
+lightning-utilities==0.11.9
+torchmetrics==1.6.1
+transformers==4.55.4
+sentence-transformers==5.1.1

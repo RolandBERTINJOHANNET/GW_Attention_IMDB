@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+.venv/
+.env
+.env.*
+
+# Editors/IDE
+.vscode/
+.idea/
+*.swp
+
+# Data / artifacts
+outputs/
+data/
+logs/
+*.npy
+*.npz
+*.hdf5
+*.ckpt
+*.pt
+*.bin
+*.csv
+*.tsv
+*.jsonl
+.DS_Store
+
+# Lightning / wandb / tensorboard
+lightning_logs/
+wandb/
+mlruns/
+tb_logs/
+
+# Cache
+.cache/
+.huggingface/
+
