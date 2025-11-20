@@ -14,7 +14,8 @@ __pycache__/
 
 # Data / artifacts
 outputs/
-data/
+!data/**/*.py
+!data/**/README.md
 logs/
 *.npy
 *.npz
@@ -36,4 +37,3 @@ tb_logs/
 # Cache
 .cache/
 .huggingface/
-
