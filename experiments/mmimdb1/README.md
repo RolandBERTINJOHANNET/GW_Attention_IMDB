@@ -40,4 +40,8 @@ PY
 python profile_train_flops.py
 ```
 
-Environment defaults point to the existing aug-70 latents and labels under `/home/rbertin/attention/imdb1/…`; override with env vars in `dataset_1x_aug70.py` if your paths differ.
+Environment variables (must be set):
+- `OTHER_BACKBONES_DIR_IMDB1_AUG70` → directory containing `mm_imdb1_globals_aug70_*{clip,blip2}_{image,text}.npy` (+ stats/manifest).
+- `IMDB1_LABELS_DIR_23` → directory with `labels_all_23.npy`, `ids_all.txt`, `class_names_23.json` (see data/mmimdb1/build_labels_23.py).
+- `MMIMDB1_DIR` → raw dataset root containing `dataset/` and `split.json`.
+- Optional overrides: `MMIMDB_IMAGE_LATENTS`, `MMIMDB_TEXT_EMBEDS` if you want to point to non-default embedding file names.

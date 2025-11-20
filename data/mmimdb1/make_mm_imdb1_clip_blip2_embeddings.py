@@ -17,16 +17,20 @@ import torch
 from torchvision import transforms as T
 from torchvision.transforms import InterpolationMode
 
-# ---------------- Hardcoded Config ----------------
-DATA_DIR   = Path("/home/rbertin/attention/imdb1/unzipped_imdb/imdb/dataset")
-OUT_DIR    = Path("/home/rbertin/attention/imdb1/embeddings_clip_blip2_aug70")
-OUT_DIR.mkdir(parents=True, exist_ok=True)
+# ---------------- Config (CLI/env) ----------------
+def _get_env_path(name: str) -> Path | None:
+    val = os.environ.get(name)
+    return Path(val) if val else None
+
+# Default to env, otherwise require CLI
+DATA_DIR   = _get_env_path("RAW_IMDB1_DATASET")   # expects .../unzip/imdb/dataset
+OUT_DIR    = _get_env_path("MMIMDB1_EMB_OUT")     # where to save embeddings
 
 OUT_PREFIX = "mm_imdb1_globals_aug70"
 
-CLIP_MODEL_ID_IMG = "openai/clip-vit-base-patch32"
-CLIP_TEXT_ID      = "sentence-transformers/clip-ViT-B-32-multilingual-v1"
-BLIP2_MODEL_ID    = "Salesforce/blip2-flan-t5-xl"
+CLIP_MODEL_ID_IMG = os.environ.get("CLIP_MODEL_ID_IMG", "openai/clip-vit-base-patch32")
+CLIP_TEXT_ID      = os.environ.get("CLIP_MODEL_ID_TXT", "sentence-transformers/clip-ViT-B-32-multilingual-v1")
+BLIP2_MODEL_ID    = os.environ.get("BLIP2_MODEL_ID", "Salesforce/blip2-flan-t5-xl")
 
 # Views / batching
 VIEWS          = 70          # 0=clean, 1..69=aug
@@ -204,6 +208,22 @@ def init_blip2():
 
 # ---------------- Main (batched across views) ----------------
 def main():
+    import argparse
+    ap = argparse.ArgumentParser(description="MM-IMDb1 embeddings (CLIP/BLIP-2, 70 views, SimCLR/BERT masked text).")
+    ap.add_argument("--data-dir", type=Path, default=DATA_DIR, help="Path to raw dataset folder containing aligned *.jpg/*.json")
+    ap.add_argument("--out-dir", type=Path, default=OUT_DIR, help="Output directory for embeddings")
+    args = ap.parse_args()
+
+    if args.data_dir is None or not args.data_dir.exists():
+        raise FileNotFoundError("Missing --data-dir (or RAW_IMDB1_DATASET env); expected path to imdb1 dataset with posters+json.")
+    if args.out_dir is None:
+        raise ValueError("Missing --out-dir (or MMIMDB1_EMB_OUT env); specify where to save embeddings.")
+
+    global DATA_DIR, OUT_DIR
+    DATA_DIR = args.data_dir
+    OUT_DIR = args.out_dir
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+
     t0 = time.time()
     print("=== MM-IMDb 1.0 → CLIP/BLIP2 pooled embeddings with 70 aligned views (BATCHED) ===")
     print(f"📂 DATA_DIR={DATA_DIR}\n🗃️ OUT_DIR={OUT_DIR}\n🧮 DEVICE={DEVICE} DTYPE={DTYPE} VIEWS={VIEWS}")

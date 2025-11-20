@@ -54,10 +54,10 @@ PY
 python profile_train_flops.py
 ```
 
-### Environment variables used by scripts
-- `OTHER_BACKBONES_DIR_IMDB1_AUG70`: defaults to `/home/rbertin/attention/imdb1/embeddings_clip_blip2_aug70` (set to your `EMB_DIR`).
-- `IMDB1_LABELS_DIR_23` or `LABELS_DIR_23`: defaults to `/home/rbertin/attention/imdb1/labels_23` (set to your `LBL_DIR`).
-- `MMIMDB1_DIR`: defaults to `/home/rbertin/attention/imdb1/unzipped_imdb/imdb` (raw dataset root for `split.json`).
+### Environment variables used by scripts (set these for your server)
+- `OTHER_BACKBONES_DIR_IMDB1_AUG70`: embeddings dir containing `mm_imdb1_globals_aug70_*{clip,blip2}_{image,text}.npy` (+ stats/manifest).
+- `IMDB1_LABELS_DIR_23` or `LABELS_DIR_23`: labels dir with `labels_all_23.npy`, `ids_all.txt`, `class_names_23.json`.
+- `MMIMDB1_DIR`: raw dataset root containing `dataset/` and `split.json`.
 - Model IDs can be overridden in the embedding script via envs (e.g., `BLIP2_MODEL_ID`, `CLIP_MODEL_ID_TXT`).
 
 ### Notes

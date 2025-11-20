@@ -23,10 +23,13 @@ from lightning.pytorch.utilities.combined_loader import CombinedLoader
 # ──────────────────────────────────────────────────────────────────────────────
 # Paths
 # ──────────────────────────────────────────────────────────────────────────────
-OTHER_BACKBONES_DIR = Path(os.getenv(
-    "OTHER_BACKBONES_DIR_IMDB1_AUG70",
-    "/home/rbertin/attention/imdb1/embeddings_clip_blip2_aug70"
-)).resolve()
+def _req_env(name: str) -> Path:
+    val = os.getenv(name)
+    if not val:
+        raise EnvironmentError(f"Set {name} to point to your data (see README).")
+    return Path(val).expanduser().resolve()
+
+OTHER_BACKBONES_DIR = _req_env("OTHER_BACKBONES_DIR_IMDB1_AUG70")
 
 DEFAULT_CLIP_IMAGE   = OTHER_BACKBONES_DIR / "mm_imdb1_globals_aug70_clip_image.npy"
 DEFAULT_CLIP_TEXT    = OTHER_BACKBONES_DIR / "mm_imdb1_globals_aug70_clip_text.npy"
@@ -37,18 +40,12 @@ IMAGE_LATENTS_PATH      = os.getenv("MMIMDB_IMAGE_LATENTS", str(DEFAULT_CLIP_IMA
 CAPTION_EMBEDDINGS_PATH = os.getenv("MMIMDB_TEXT_EMBEDS",  str(DEFAULT_CLIP_TEXT))
 
 # Base labels directory (23-class, multi-label, one row per ORIGINAL sample)
-LABELS_DIR_23 = Path(os.getenv(
-    "IMDB1_LABELS_DIR_23",
-    "/home/rbertin/attention/imdb1/labels_23"
-)).resolve()
+LABELS_DIR_23 = _req_env("IMDB1_LABELS_DIR_23")
 LABELS_ALL_23_NPY = LABELS_DIR_23 / "labels_all_23.npy"
 IDS_ALL_TXT       = LABELS_DIR_23 / "ids_all.txt"
 
 # IMDB1 raw data root (images/json + split.json)
-IMDB1_DIR = Path(os.getenv(
-    "MMIMDB1_DIR",
-    "/home/rbertin/attention/imdb1/unzipped_imdb/imdb"
-)).resolve()
+IMDB1_DIR = _req_env("MMIMDB1_DIR")
 DATASET_DIR = IMDB1_DIR / "dataset"
 SPLIT_JSON  = IMDB1_DIR / "split.json"
 

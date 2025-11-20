@@ -26,16 +26,19 @@ from typing import List, Tuple, Dict
 import numpy as np
 from tqdm import tqdm
 
-# ---------------- Hardcoded Config ----------------
-DATA_DIR        = Path("/home/rbertin/attention/imdb1/unzipped_imdb/imdb/dataset")
-OUT_DIR         = Path("/home/rbertin/attention/imdb1/embeddings_clip_blip2_aug70")
-OUT_DIR.mkdir(parents=True, exist_ok=True)
+# ---------------- Config (CLI/env) ----------------
+def _env_path(name: str) -> Path | None:
+    val = os.environ.get(name)
+    return Path(val) if val else None
+
+DATA_DIR        = _env_path("RAW_IMDB1_DATASET")       # expects .../unzip/imdb/dataset
+OUT_DIR         = _env_path("MMIMDB1_EMB_OUT")         # embeddings dir with *_aug70 files
 
 OUT_PREFIX      = "mm_imdb1_globals_aug70"
 
-LABELS_DIR_23   = Path("/home/rbertin/attention/imdb1/labels_23")
-LABELS_ALL_NPY  = LABELS_DIR_23 / "labels_all_23.npy"
-IDS_ALL_TXT     = LABELS_DIR_23 / "ids_all.txt"
+LABELS_DIR_23   = _env_path("IMDB1_LABELS_DIR_23")     # base labels dir
+LABELS_ALL_NPY  = LABELS_DIR_23 / "labels_all_23.npy" if LABELS_DIR_23 else None
+IDS_ALL_TXT     = LABELS_DIR_23 / "ids_all.txt" if LABELS_DIR_23 else None
 
 # Views / batching
 VIEWS           = 70      # 0=clean, 1..69=aug
@@ -100,6 +103,27 @@ def build_labels_in_embed_order(pairs: List[Tuple[Path, Path]], Y_all: np.ndarra
 
 # ---------------- Main ----------------
 def main():
+    import argparse
+    ap = argparse.ArgumentParser(description="Augment MM-IMDb1 labels to match 70-view embeddings (deterministic noise).")
+    ap.add_argument("--data-dir", type=Path, default=DATA_DIR, help="Raw dataset dir (aligned .json/.jpg stems)")
+    ap.add_argument("--out-dir",  type=Path, default=OUT_DIR,  help="Embedding output dir (will write labels there)")
+    ap.add_argument("--labels-dir", type=Path, default=LABELS_DIR_23, help="Dir containing labels_all_23.npy and ids_all.txt")
+    args = ap.parse_args()
+
+    if args.data_dir is None or not args.data_dir.exists():
+        raise FileNotFoundError("Missing --data-dir (or RAW_IMDB1_DATASET env); expected imdb1 dataset path.")
+    if args.out_dir is None:
+        raise ValueError("Missing --out-dir (or MMIMDB1_EMB_OUT env); specify embeddings dir.")
+    if args.labels_dir is None or not (args.labels_dir / "labels_all_23.npy").exists():
+        raise FileNotFoundError("Missing labels_all_23.npy/ids_all.txt; pass --labels-dir or set IMDB1_LABELS_DIR_23.")
+
+    global DATA_DIR, OUT_DIR, LABELS_DIR_23, LABELS_ALL_NPY, IDS_ALL_TXT
+    DATA_DIR = args.data_dir
+    OUT_DIR = args.out_dir; OUT_DIR.mkdir(parents=True, exist_ok=True)
+    LABELS_DIR_23 = args.labels_dir
+    LABELS_ALL_NPY = LABELS_DIR_23 / "labels_all_23.npy"
+    IDS_ALL_TXT    = LABELS_DIR_23 / "ids_all.txt"
+
     t0 = time.time()
     print("=== MM-IMDb 1.0 → LABEL embeddings with 70 aligned views (Gaussian aug, clipped ±0.2, no normalization) ===")
     print(f"📂 DATA_DIR={DATA_DIR}\n🗃️ OUT_DIR={OUT_DIR}\n🧪 NOISE_STD={NOISE_STD}  NOISE_CLIP=±{NOISE_CLIP}  VIEWS={VIEWS}")
